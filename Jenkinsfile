@@ -4,23 +4,22 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "asr5454/http-echo:latest"
+        IMAGE_NAME = "asr5454/docker-hello:latest"  // Replace with your actual Docker Hub image name if different
+        DOCKER_USERNAME = credentials('dockerhub').username
+        DOCKER_PASSWORD = credentials('dockerhub').password
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/hashicorp/http-echo.git'
+                git 'https://github.com/asr5454/docker-hello.git'  // Replace with your actual repo if different
             }
         }
 
         stage('Build and Push Docker Image') {
             steps {
-                // 👇 Securely load Docker credentials
-                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    script {
-                        dockerUtils.buildAndPushDockerImage(IMAGE_NAME)
-                    }
+                script {
+                    dockerUtils.buildAndPushDockerImage(IMAGE_NAME)
                 }
             }
         }
@@ -28,9 +27,9 @@ pipeline {
         stage('Run Container and Health Check') {
             steps {
                 sh """
-                    docker run -d --name http-echo -p 5678:5678 ${IMAGE_NAME}
-                    sleep 5
-                    curl http://localhost:5678
+                    docker run -d --name docker-hello ${IMAGE_NAME}
+                    sleep 2
+                    docker logs docker-hello
                 """
             }
         }
@@ -39,7 +38,7 @@ pipeline {
     post {
         always {
             sh """
-                docker rm -f http-echo || true
+                docker rm -f docker-hello || true
                 docker rmi ${IMAGE_NAME} || true
             """
         }

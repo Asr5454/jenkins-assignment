@@ -4,9 +4,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "asr5454/http-echo:latest"  // Replace with your actual Docker Hub repo if different
-        DOCKER_USERNAME = credentials('dockerhub').username
-        DOCKER_PASSWORD = credentials('dockerhub').password
+        IMAGE_NAME = "asr5454/http-echo:latest"
     }
 
     stages {
@@ -18,8 +16,11 @@ pipeline {
 
         stage('Build and Push Docker Image') {
             steps {
-                script {
-                    dockerUtils.buildAndPushDockerImage(IMAGE_NAME)
+                // 👇 Securely load Docker credentials
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    script {
+                        dockerUtils.buildAndPushDockerImage(IMAGE_NAME)
+                    }
                 }
             }
         }

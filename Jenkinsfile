@@ -4,22 +4,22 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "asr5454/docker-hello:latest"  // Replace with your actual Docker Hub image name if different
-        DOCKER_USERNAME = credentials('dockerhub').username
-        DOCKER_PASSWORD = credentials('dockerhub').password
+        IMAGE_NAME = "asr5454/docker-hello:latest"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/asr5454/docker-hello.git'  // Replace with your actual repo if different
+                git 'https://github.com/asr5454/docker-hello.git'
             }
         }
 
         stage('Build and Push Docker Image') {
             steps {
-                script {
-                    dockerUtils.buildAndPushDockerImage(IMAGE_NAME)
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    script {
+                        dockerUtils.buildAndPushDockerImage(IMAGE_NAME)
+                    }
                 }
             }
         }

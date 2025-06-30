@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/asr5454/docker-hello.git'
+                git branch: 'main', url: 'https://github.com/asr5454/docker-hello.git'
             }
         }
 
